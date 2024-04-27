@@ -122,6 +122,11 @@ type Query {
 type Mutation {
   addBook(title: String, author: String): Book
 }
+
+type Subscription {
+  onAddBook : Book
+  @aws_subscribe(mutations: ["addBook"])
+}
 ```
 <!-- CODE:END -->
 
@@ -165,7 +170,13 @@ export const handler = () => authors;
 ``` TypeScript
 import { books } from "../data/books";
 
-export const handler = () => books;
+export const handler = (context: any) => {
+    if(context.info.fieldName === 'addBook') {
+        return context.args
+    } else {
+        return books
+    }
+};
 
 ```
 <!-- CODE:END -->
@@ -232,15 +243,15 @@ import {
     AmplifyAppSyncSimulator,
     AmplifyAppSyncSimulatorAuthenticationType,
     AmplifyAppSyncSimulatorConfig,
-} from 'amplify-appsync-simulator'
+} from '@aws-amplify/amplify-appsync-simulator'
 
-import { handler as queryBooksHandler } from './resolvers/queryBooks'
-import { handler as queryAuthorsHandler } from './resolvers/queryAuthors'
-import { handler as bookAuthorHandler } from './resolvers/bookAuthor'
-import { handler as authorBooksHandler } from './resolvers/authorBooks'
-import { schema } from "./schema"
-import { readVTL } from './vtl/readVTL'
-import { resolversConfig } from './resolversConfig'
+import {handler as queryBooksHandler} from './resolvers/queryBooks'
+import {handler as queryAuthorsHandler} from './resolvers/queryAuthors'
+import {handler as bookAuthorHandler} from './resolvers/bookAuthor'
+import {handler as authorBooksHandler} from './resolvers/authorBooks'
+import {schema} from "./schema"
+import {readVTL} from './vtl/readVTL'
+import {resolversConfig} from './resolversConfig'
 
 
 class AppSyncSimulator {
@@ -256,9 +267,9 @@ class AppSyncSimulator {
         const simulatorConfig: AmplifyAppSyncSimulatorConfig = {
             appSync: {
                 defaultAuthenticationType: {
-                    authenticationType: AmplifyAppSyncSimulatorAuthenticationType.AMAZON_COGNITO_USER_POOLS,
-                    cognitoUserPoolConfig: {},
+                    authenticationType: AmplifyAppSyncSimulatorAuthenticationType.API_KEY,
                 },
+                apiKey: "da2-fakeApiId123456",
                 name: 'api-local',
                 additionalAuthenticationProviders: [],
             },
