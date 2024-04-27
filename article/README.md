@@ -20,6 +20,7 @@ publications:
 ---
 
 
+
 # Boost local development with AWS AppSync Simulator🚀✨
 
 Hi there! 👊
